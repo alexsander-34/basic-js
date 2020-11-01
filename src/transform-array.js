@@ -1,30 +1,39 @@
 const CustomError = require("../extensions/custom-error");
 
-module.exports = function transform( arr ) {
-    
-  // remove line with error and write your code here
-  if (!Array.isArray(arr)) {throw new Error();} 
-else if (arr.length == 0) {return arr;}
-  let mas=[];
-for(let i=0; i<arr.length; i++){
-  if(arr[i]==='--discard-next'){
-          i++;}
-  else if(arr[i]==='--discard-prev'){
-          if(mas.length>0){
-              mas.pop();
-          }
-      }
-  else if(arr[i]==='--double-next'){
-          if((i+1)<arr.length){
-              mas.push(arr[i+1]);
-          }
-      }
-  else if(arr[i]==='--double-prev'){
-          if(i>0){
-              mas.push(arr[i-1]);
-          }
-      }
-   else {mas.push(arr[i]);}
-}
-return mas;
+
+module.exports = function transform(arr) {
+  if (!Array.from(arr)) {
+    throw new TypeError();
+  }
+
+  let newArr = arr.slice(0);
+  let pos = 0;
+
+  while (pos < newArr.length) {
+    let item = newArr[pos];
+
+    if (item === "--discard-next") {
+      newArr.splice(pos + 1, 1);
+    } else if (item === "--discard-prev" && pos > 0) {
+      newArr.splice(pos - 1, 1);
+    } else if (item === "--double-next") {
+      newArr.splice(pos, 0, newArr[pos + 1]);
+      pos++;
+    } else if (item === "--double-prev") {
+      newArr.splice(pos, 0, newArr[pos - 1]);
+      pos++;
+    }
+
+    pos++;
+  }
+
+  return newArr.filter((item) => {
+    return (
+      item != undefined &&
+      item != "--discard-next" &&
+      item != "--discard-prev" &&
+      item != "--double-next" &&
+      item != "--double-prev"
+    );
+  });
 };
